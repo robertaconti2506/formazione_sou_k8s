@@ -1,0 +1,21 @@
+- name: Crea volume Jenkins
+  community.docker.docker_volume:
+    name: jenkins_home
+
+- name: Crea container Jenkins
+  community.docker.docker_container:
+    name: jenkins
+    image: jenkins/jenkins:lts
+    state: started
+    restart_policy: always
+
+    networks:
+      - name: network1
+        ipv4_address: 172.19.0.9
+
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+
+    volumes:
+      - jenkins_home:/var/jenkins_home

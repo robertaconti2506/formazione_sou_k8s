@@ -1,0 +1,8 @@
+---
+jenkins_agent_controller_url: "http://192.168.56.45:8080"
+jenkins_agent_name: "agent1"
+jenkins_agent_secret: ""
+jenkins_agent_workdir: "/home/jenkins/agent"
+
+jenkins_agent_admin_user: "robertaconti"
+jenkins_agent_admin_token: ""

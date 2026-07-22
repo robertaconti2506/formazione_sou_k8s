@@ -1,0 +1,10 @@
+---
+- name: Configurazione Docker
+  hosts: rocky
+    # become: true altrimenti non funziona requests
+
+  roles:
+    - docker
+    - docker_network
+    - jenkins
+    - jenkins_agent
