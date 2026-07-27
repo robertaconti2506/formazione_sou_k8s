@@ -1,0 +1,9 @@
+FROM {{ item.image }}
+
+WORKDIR {{ item.workdir }} 
+
+COPY {{ item.file }} .
+
+EXPOSE {{ item.port }} 
+
+CMD ["{{ item.command }}"] 
