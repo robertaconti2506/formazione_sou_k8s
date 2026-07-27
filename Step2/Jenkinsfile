@@ -1,0 +1,25 @@
+pipeline {
+    agent agent1 
+
+    stages {
+        stage('Build') {
+            steps {
+                sh 'docker build -t flask-app-example .'
+            }
+        }
+
+        stage('Push') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-credentials',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_TOKEN'
+                )]) {
+                    sh 'echo $DOCKER_TOKEN | docker login -u $DOCKER_USER --password-stdin'
+                    sh 'docker tag flask-app-example robertasou/flask-app-example:latest'
+                    sh 'docker push robertasou/flask-app-example:latest'
+                }
+            }
+        }
+    }
+}
