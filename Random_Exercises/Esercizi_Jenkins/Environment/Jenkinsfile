@@ -1,0 +1,37 @@
+pipeline {
+    agent {
+        label 'agent1'
+    }
+
+    parameters {
+        choice(
+            name: 'ENVIRONMENT',
+            choices: ['PRODUCTION', 'DEVELOPMENT'],
+            description: 'Seleziona l\'ambiente'
+        )
+    }
+
+    stages {
+        stage('PRODUCTION') {
+            when {
+                expression {
+                    params.ENVIRONMENT == 'PRODUCTION'
+                }
+            }
+            steps {
+                echo "ENVIRONMENT = ${params.ENVIRONMENT}"
+            }
+        }
+
+        stage('DEVELOPMENT') {
+            when {
+                expression {
+                    params.ENVIRONMENT == 'DEVELOPMENT'
+                }
+            }
+            steps {
+                echo "ENVIRONMENT = ${params.ENVIRONMENT}"
+            }
+        }
+    }
+}
