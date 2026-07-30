@@ -11,10 +11,29 @@
   delay: 18
   until: jenkins_agent_check.status == 200
 
+- name: Crea directory per build agent 
+  ansible.builtin.file: 
+    path: /opt/jenkins-agent 
+    state: directory
+  become: true
+
+- name: Copia Dockerfile agent 
+  ansible.builtin.copy: 
+    src: Dockerfile
+    dest: /opt/jenkins-agent/Dockerfile
+  become: true
+
+- name: Build immagine Jenkins agent custom 
+  community.docker.docker_image:
+    name: jenkins-agent-docker 
+    build: 
+      path: /opt/jenkins-agent
+    source: build 
+
 - name: Crea container Jenkins Agent
   community.docker.docker_container:
     name: "{{ jenkins_agent_name }}"
-    image: jenkins/inbound-agent:latest
+    image: jenkins-agent-docker:latest
     state: started
     restart_policy: always
 
@@ -29,3 +48,4 @@
       JENKINS_SECRET: "{{ jenkins_agent_secret }}"
       JENKINS_AGENT_NAME: "{{ jenkins_agent_name }}"
       JENKINS_AGENT_WORKDIR: "{{ jenkins_agent_workdir }}"
+
