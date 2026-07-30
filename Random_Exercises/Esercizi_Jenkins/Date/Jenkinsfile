@@ -1,0 +1,38 @@
+pipeline {
+    agent any
+
+    stages {
+
+        stage('Build') {
+            steps {
+
+                script {
+
+                    // Creo oggetto Date 
+                    def data = new Date()
+
+                    // Giorno della settimana
+                    def giorno = data.getDay()
+
+                    // Controllo se giorno lavorativo 
+                    if (giorno >= 1 && giorno <= 5) {
+
+                        sh 'docker build -t flask-app-example .'
+
+                    } else if (giorno == 0 || giorno == 6) {
+
+                        echo 'WARNING: build non eseguita nel weekend'
+
+                    } else {
+
+                        error 'ERRORE: giorno non valido'
+
+                    }
+
+                }
+
+            }
+        }
+
+    }
+}
