@@ -1,5 +1,5 @@
-# <h1 align="center">Date</h1>
-La pipeline Jenkins esegue una build esclusivamente dal lunedì al venerdì.
+ <h1 align="center">Date</h1>
+La pipeline Jenkins esegue una build esclusivamente dal lunedì al venerdì. </br>
 Se la pipeline viene avviata il sabato o la domenica, la build non viene eseguita e viene mostrato un messaggio di warning.
 
 ## Funzionamento 
