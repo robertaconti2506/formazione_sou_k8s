@@ -1,5 +1,6 @@
 <h1 align="center">Environment</h1>
-La pipeline Jenkins accetta un parametro denominato `ENVIRONMENT` e, in base al valore scelto, viene eseguito uno dei due stage, `PRODUCTION` e `DEVELOPMENT`.
+
+La pipeline Jenkins accetta un parametro denominato `ENVIRONMENT` e, in base al valore scelto, viene eseguito uno dei due stage, `PRODUCTION` e `DEVELOPMENT`. </br>
 Ogni stage stampa a video il valore del parametro selezionato utilizzando il comando `echo`.
 
 ## Funzionamento 
