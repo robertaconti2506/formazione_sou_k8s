@@ -1,4 +1,7 @@
+// Funzione che esegue la build dell'immagine Docker e il push sul registry 
 def buildAndPushTag(Map args) {
+	
+	// Valori di default utilizzati se alcuni parametri non vengono specificati in input
 	def defaults = [
 		registryUrl: 'https://index.docker.io/v1/',
 		dockerfileDir: "./",
@@ -7,23 +10,31 @@ def buildAndPushTag(Map args) {
 		pushLatest: false 
 	]
 
+	// Unisce i parametri passati alla funzione con quelli di default
 	args = defaults + args 
 
+	// Autenticazione al registry Docker tramite le credenziali configurate in Jenkins
 	docker.withRegistry(args.registryUrl, 'dockerhub-credentials') {
+		
+		// Build dell'immagine Docker
 		def image = docker.build(
 			args.image,
 		    	"${args.buildArgs} ${args.dockerfileDir} -f ${args.dockerfileName}"
 		)
 
+		// Push dell'immagine con il tag calcolato dalla pipeline
 		image.push(args.buildTag)
 
+		// Se richiesto, pubblica anche il tag "latest"
 		if(args.pushLatest) {
 			image.push("latest")
 			sh "docker rmi --force ${args.image}:latest"
 		} 
 
+		// Rimuove l'immagine locale per liberare spazio sul nodo Jenkins
 		sh "docker rmi --force ${args.image}:${args.buildTag}"
 
+		// Restituisce il nome completo dell'immagine pubblicata 
 		return "${args.image}:${args.buildTag}"
 	}
 }
@@ -34,21 +45,35 @@ pipeline {
 	agent any 
 
 	stages {
+
+		// Determina il tag Docker da utilizzare in base al branch o al tag Git
 		stage('Set Docker Tag') {
 			steps {
 				script {
+
+					// Se la build è stata avviata da un tag Git, utilizza lo stesso tag
 					if (env.TAG_NAME) {
 						env.DOCKER_TAG = env.TAG_NAME 
+					
+					// Se la build proviene dal branch principale, utilizza "latest"
 					} else if (env.BRANCH_NAME == 'main') {
 						env.DOCKER_TAG = 'latest' 
+					
+					// Se la build proviene dal branch "develop", utilizza il formato "develop-<SHA>
 					} else if (env.BRANCH_NAME == 'develop') {
+						
+						// Recupera lo SHA abbreviato del commit più recente
 						def sha = sh( 
 							script: 'git rev-parse --short HEAD', 
 							returnStdout: true
 						).trim()
 						env.DOCKER_TAG = "develop-${sha}" 
 					} else { 
+
+						// Per tutti gli altri branch crea un tag univoco nel formato "<branch>-<SHA>
 						def sha = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim() 
+						
+						// Sostituisce eventuali caratteri non validi nel nome del branch
 						def safeBranch = env.BRANCH_NAME.replaceAll(/[^a-zA-Z0-9-_]/, '-')
 						env.DOCKER_TAG = "${safeBranch}-${sha}"
 					}
@@ -56,9 +81,13 @@ pipeline {
 			}
 		}
 
+		// Build dell'immagine Docker e push sul registry 
 		stage('Build and Push') {
 			steps {
 			    script {
+				    
+				    // Richiama la funzione di build e push passando l'immagine, 
+				    // il tag calcolato e l'eventuale pubblicazione di latest
 				    buildAndPushTag(
 				        image: "robertasou/flask-app-example",
 					buildTag: env.DOCKER_TAG,
@@ -67,24 +96,5 @@ pipeline {
 			    }
 		    }
 	    }
-        //stage('Build') {
-           //steps {
-                //sh 'docker build -t flask-app-example ./Step2'
-            //}
-       // }
-
-        //stage('Push') {
-            //steps {
-                //withCredentials([usernamePassword(
-                    //credentialsId: 'dockerhub-credentials',
-                    //usernameVariable: 'DOCKER_USER',
-                    //passwordVariable: 'DOCKER_TOKEN'
-                //)]) {
-                    //sh 'echo $DOCKER_TOKEN | docker login -u $DOCKER_USER --password-stdin'
-                    //sh 'docker tag flask-app-example robertasou/flask-app-example:latest'
-                    //sh 'docker push robertasou/flask-app-example:latest'
-                //}
-            //}
-        //}
     }
 }
